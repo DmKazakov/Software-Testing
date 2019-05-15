@@ -21,10 +21,7 @@ class YouTrackIssuesTest {
 
     @BeforeAll
     fun setUp() {
-        System.setProperty("webdriver.opera.driver", "/home/dmitry/HW/Test/operadriver_linux64/operadriver")
-        val options = OperaOptions()
-        options.setBinary("/usr/lib/x86_64-linux-gnu/opera/opera")
-        driver = OperaDriver(options)
+        driver = OperaDriver()
         register()
     }
 
