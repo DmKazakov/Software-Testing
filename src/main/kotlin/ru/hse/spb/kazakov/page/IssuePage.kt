@@ -8,14 +8,15 @@ import org.openqa.selenium.support.FindBy
 class IssuePage(driver: WebDriver) : YouTrackPage(driver) {
     @FindBy(id = "id_l.I.ic.icr.it.issSum")
     private val summary: WebElement? = null
-
     @FindBy(id = "id_l.I.ic.icr.d.description")
     private val description: WebElement? = null
 
+    init {
+        waitFor(summary)
+        waitFor(description)
+    }
+
     fun getSummary(): String = summary!!.text
 
-    fun getDescription(): String {
-        val text = description!!.findElements(By.className("text"))
-        return if (text.isEmpty()) "" else text[0].text
-    }
+    fun getDescription() = description!!.text
 }

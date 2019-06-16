@@ -27,4 +27,6 @@ class NewIssuePage(driver: WebDriver) : YouTrackPage(driver) {
             null
         }
     }
+
+    fun getErrorPopUp(): WebElement? = driver.findElement(By.id("__popup__1"))
 }

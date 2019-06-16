@@ -9,7 +9,6 @@ import ru.hse.spb.kazakov.page.IssuesPage
 import ru.hse.spb.kazakov.page.LoginPage
 import ru.hse.spb.kazakov.page.YouTrackPage
 
-
 private const val TEST_LOGIN = "testing-account"
 private const val TEST_PASSWORD = "123456"
 private const val LOGIN_URL = "http://localhost:8080/login"
@@ -63,29 +62,19 @@ class YouTrackIssuesTest {
 
 
         assertNull(currentPage.createIssue())
+        assertNotNull(currentPage.getErrorPopUp())
         currentPage = currentPage.issuesPage()
         assertEquals(issuesNumber, currentPage.issuesNumber())
     }
 
     @Test
     fun testAddEmptyDescriptionIssue() {
-        val issuesNumber = issuesPage.issuesNumber()
-        val summary = "summary"
-
-        val issuesPage = addIssue(summary, "", issuesPage)
-        assertEquals(issuesNumber + 1, issuesPage.issuesNumber())
-        checkIssue(summary, "", 0, issuesPage)
+        testAddIssue("title", "", "title", "No description")
     }
 
     @Test
     fun testAddValidIssue() {
-        val issuesNumber = issuesPage.issuesNumber()
-        val summary = "title"
-        val description = "description"
-
-        val issuesPage = addIssue(summary, description, issuesPage)
-        assertEquals(issuesNumber + 1, issuesPage.issuesNumber())
-        checkIssue(summary, description, 0, issuesPage)
+        testAddIssue("title", "description")
     }
 
     @Test
@@ -103,6 +92,58 @@ class YouTrackIssuesTest {
         assertEquals(issuesNumber + 2, currentPage.issuesNumber())
         currentPage = checkIssue(firstIssueSummary, firstIssueDescription, 1, currentPage)
         checkIssue(secondIssueSummary, secondIssueDescription, 0, currentPage)
+    }
+
+    @Test
+    fun testAddMultiLanguageIssue() {
+        testAddIssue("問題", "Описанме")
+    }
+
+    @Test
+    fun testAddUnicodeCharsIssue() {
+        testAddIssue("(づ｡◕‿‿◕｡)づ᳄", "⁂₰ $%∞")
+    }
+
+    @Test
+    fun testAddLongIssue() {
+        testAddIssue("summary".repeat(100), "description".repeat(100))
+    }
+
+    @Test
+    fun testAddMultilineIssue() {
+        val summary = "fdso\ngfdg\n\n\ngfd\n"
+        val description = "\nfds\n\ngfd00\n"
+        testAddIssue(summary, description, summary.filter { it != '\n' }, "fds\n\ngfd00")
+    }
+
+    @Test
+    fun testAddIdenticalIssue() {
+        val issuesNumber = issuesPage.issuesNumber()
+        val summary = "issue"
+        val description = "description"
+
+        var currentPage: YouTrackPage
+        currentPage = addIssue(summary, description, issuesPage)
+        currentPage = addIssue(summary, description, currentPage)
+
+        assertEquals(issuesNumber + 2, currentPage.issuesNumber())
+        currentPage = checkIssue(summary, description, 1, currentPage)
+        checkIssue(summary, description, 0, currentPage)
+    }
+
+    @Test
+    fun testAddWhitespaceIssue() {
+        testAddIssue("   sth gf   gf  ", "     q            f         ", "sth gf gf")
+    }
+
+    private fun testAddIssue(
+        summary: String, description: String,
+        expectedSummary: String = summary, expectedDescription: String = description
+    ) {
+        val issuesNumber = issuesPage.issuesNumber()
+        val issuesPage = addIssue(summary, description, issuesPage)
+        assertEquals(issuesNumber + 1, issuesPage.issuesNumber())
+        checkIssue(expectedSummary, expectedDescription, 0, issuesPage)
     }
 
     private fun addIssue(summary: String, description: String, page: IssuesPage): IssuesPage {
